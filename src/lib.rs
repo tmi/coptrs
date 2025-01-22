@@ -40,7 +40,7 @@ fn nearest_common_descendant<'a>(py: Python<'a>, distances: Bound<'a, PyDict>, e
 }
 
 #[pymodule]
-fn graphs(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn coptrs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(floyd_warshall_u32, m)?)?;
     m.add_function(wrap_pyfunction!(floyd_warshall, m)?)?;
     m.add_function(wrap_pyfunction!(nearest_common_descendant_u32, m)?)?;
