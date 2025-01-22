@@ -1,7 +1,7 @@
 import fire
 from time import perf_counter_ns
 import sys
-from graphs import floyd_warshall as rs_floyd_warshall
+from coptrs import floyd_warshall as rs_floyd_warshall
 from concurrent.futures import ThreadPoolExecutor, wait
 
 Matrix = dict[tuple[int, int], int]

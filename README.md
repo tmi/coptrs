@@ -30,3 +30,5 @@ For example usage, see the [floyd warshall benchmark](examples/benchm_floyd_wars
 ## Roadmap
 * extend interface for more graph representation (list of neighbors, double dicts, ...)
 * add more algorithms
+* fix: make the release more convenient -- derive the Cargo.toml's version from the tag
+* fix: have python api expose `__version__`, set some `__doc__`, etc
