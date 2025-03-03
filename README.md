@@ -1,6 +1,13 @@
+<p align="center">
+[![Static Badge](https://github.com/ecmwf/codex/raw/refs/heads/main/Project%20Maturity/emerging_badge.svg)](https://github.com/ecmwf/codex/raw/refs/heads/main/Project%20Maturity)
+</p>
+
+> \[!IMPORTANT\]
+> This software is **Emerging** and subject to ECMWF's guidelines on [Software Maturity](https://github.com/ecmwf/codex/raw/refs/heads/main/Project%20Maturity).
+
 # Combinatorial Optimization in Rust
 
-This is a mostly toy project with implementation of a few combinatorial optimization algorithms in Rust, with a Python interface.
+This is an implementation of a few combinatorial optimization algorithms in Rust, with a Python interface.
 
 Currently, we implement:
  * Floyd-Warshall -- minimum distance for all vertex pairs,
