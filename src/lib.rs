@@ -1,7 +1,7 @@
 // interface of the crate
 
 mod dist;
-mod base;
+pub mod base;
 mod convert;
 
 use pyo3::prelude::*;

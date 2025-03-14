@@ -19,7 +19,8 @@ where T: Hash, T: Eq {
 
 impl<T> Graph<T> where T: Hash, T: Eq, T: Copy {
     fn m2v(mat: &Matrix<T>) -> HashSet<T> {
-        let mut vertices = HashSet::new();
+        // with_capacity brings minor-but-measurable performance improvement. We go with isqrt to not overallocate for sparse graphs
+        let mut vertices = HashSet::with_capacity(mat.len().isqrt());
         for ((a, b), _) in mat {
             vertices.insert(*a);
             vertices.insert(*b);
