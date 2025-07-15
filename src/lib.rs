@@ -24,18 +24,18 @@ fn floyd_warshall<'a>(py: Python<'a>, edges: Bound<'a, PyDict>) -> Bound<'a, PyD
 }
 
 #[pyfunction]
-fn nearest_common_descendant_u32<'a>(py: Python<'a>, distances: Matrix<u32>, extreme: u32) -> Matrix<u32> {
+fn nearest_common_descendant_u32<'a>(py: Python<'a>, edges: Matrix<u32>, distances: Matrix<u32>, extreme: u32) -> Matrix<u32> {
     py.allow_threads(||{
-        // we don't really use edges in the algorithm
-        let g = Graph::from_dist(&distances);
-        dist::nearest_common_descendant(&g, &distances, extreme)
+        let g = Graph::from_edges(edges);
+        dist::nearest_common_descendant_quad(&g, &distances, extreme)
     })
 }
 
 #[pyfunction]
-fn nearest_common_descendant<'a>(py: Python<'a>, distances: Bound<'a, PyDict>, extreme: u32) -> Bound<'a, PyDict> {
+fn nearest_common_descendant<'a>(py: Python<'a>, edges: Bound<'a, PyDict>, distances: Bound<'a, PyDict>, extreme: u32) -> Bound<'a, PyDict> {
+    let (edges_r, _) = convert::from_tuples_matrix(edges);
     let (distances_r, i2o) = convert::from_tuples_matrix(distances);
-    let raw_result = nearest_common_descendant_u32(py, distances_r, extreme);
+    let raw_result = nearest_common_descendant_u32(py, edges_r, distances_r, extreme);
     convert::into_tuples_matrix(py, raw_result, i2o)
 }
 
