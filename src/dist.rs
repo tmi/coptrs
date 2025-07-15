@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::cmp::{Eq, max, min};
 use std::hash::Hash;
 use std::marker::Copy;
@@ -48,10 +48,11 @@ where T: Hash, T: Copy, T: Eq {
     dist
 }
 
-pub fn nearest_common_descendant<T>(graph: &Graph<T>, dist: &Matrix<T>, extreme: u32) -> Matrix<T>
+/* more commonly known as lowest common ancestor in DAGs */
+pub fn nearest_common_descendant_cubic<T>(graph: &Graph<T>, dist: &Matrix<T>, extreme: u32) -> Matrix<T>
 where T: Hash, T: Copy, T: Eq {
     // NOTE we assume input `dist` matrix to be symmetric
-    // TODO fix? Or expose as a parameter?
+    // TODO fix by assuming orientation!
     let mut ncd: Matrix<T> = HashMap::new();
     let vertices: Vec<&T> = graph.vertices.iter().collect();
     let n: usize = vertices.len();
@@ -71,6 +72,66 @@ where T: Hash, T: Copy, T: Eq {
                 let o = min(m, n);
                 ncd.insert((*a, *b), o);
                 ncd.insert((*b, *a), o);
+            }
+        }
+    }
+    ncd
+}
+
+pub fn nearest_common_descendant_quad<T>(graph: &Graph<T>, dist: &Matrix<T>, extreme: u32) -> Matrix<T>
+where T: Hash, T: Copy, T: Eq, T: std::fmt::Debug {
+    let mut remaining_children: HashMap<T, u32> = HashMap::new();
+    let mut parents: HashMap<T, Vec<T>> = HashMap::new();
+    let mut children: HashMap<T, Vec<T>> = HashMap::new();
+    let mut queue: VecDeque<T> = VecDeque::new();
+    let mut interm: HashMap<(T, T), (T, u32)> = HashMap::new();
+    for v in graph.vertices.iter() {
+        remaining_children.insert(*v, 0);
+        parents.insert(*v, vec!());
+        children.insert(*v, vec!());
+    }
+    for ((h, t), _) in graph.edges.iter() {
+        remaining_children.entry(*h).and_modify(|v| *v+=1);
+        parents.entry(*t).and_modify(|v| v.push(*h));
+        children.entry(*h).and_modify(|v| v.push(*t));
+    }
+    remaining_children.iter().filter(|(_, c)| **c == 0).for_each(|(v, _)| queue.push_back(*v));
+
+    while let Some(v) = queue.pop_front() {
+        for u in graph.vertices.iter() {
+            if let Some(dist) = dist.get(&(*u, v)) {
+                interm.insert((v, *u), (v, *dist));
+            }
+            for c in children[&v].iter() {
+                if let Some((d, _)) = interm.get(&(*c, *u)) {
+                    let new_dist = max(dist[&(v, *d)], dist[&(*u, *d)]);
+                    if let Some((_, old_dist)) = interm.get(&(v, *u)) {
+                        if *old_dist > new_dist {
+                            interm.insert((v, *u), (*d, new_dist));
+                        }
+                    } else {
+                        interm.insert((v, *u), (*d, new_dist));
+                    }
+                }
+            }
+        }
+        for p in parents[&v].iter() {
+            let rc = remaining_children[p];
+            if rc == 1 {
+                queue.push_back(*p);
+            } else {
+                remaining_children.insert(*p, rc-1);
+            }
+        }
+    }
+
+    let mut ncd: Matrix<T> = HashMap::new();
+    for v in graph.vertices.iter() {
+        for u in graph.vertices.iter() {
+            if let Some((_, dist)) = interm.get(&(*v, *u)) {
+                ncd.insert((*v, *u), *dist);
+            } else {
+                ncd.insert((*v, *u), extreme);
             }
         }
     }
@@ -120,6 +181,7 @@ mod tests {
             ((1, 3), 2),
             ((2, 3), 1),
         ])));
-        assert_eq!(nearest_common_descendant(&g2v, &dist, 42), ncd_dist_expected);
+        assert_eq!(nearest_common_descendant_cubic(&g2v, &dist, 42), ncd_dist_expected);
+        assert_eq!(nearest_common_descendant_quad(&g2v, &dist, 42), ncd_dist_expected);
     }
 }
